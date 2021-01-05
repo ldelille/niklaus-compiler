@@ -1,0 +1,17 @@
+// La compilation doit reussir.
+//
+// Imprime 0, 1, 2, 3, 4, -1, dans cet ordre.
+
+
+program test_while_lt;
+var a, b, c, d;
+{
+	b := 5;
+	a := 0;
+	while (a < b) {
+		write a;
+		a := a + 1;
+	}
+	write (12-2);
+}
+

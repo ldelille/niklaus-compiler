@@ -1,0 +1,14 @@
+// La compilation de ce programme doit reussir.
+// Ce programme doit lire un entier, l'afficher puis afficher 100
+
+program VarBis;
+var a, b, c;
+{
+    read a;
+    b := 234;
+    write b;
+    write a;
+    c := 100;
+    write c;
+}
+

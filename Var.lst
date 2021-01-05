@@ -1,0 +1,252 @@
+0000 2E00                         mov r6,#stack_initialization
+     00FB
+0002 2F00                         mov r7,#endread1
+     0008
+0004 8800                         b readInt
+     00A0
+0006 1800                         str r0,mem_a
+     00F8
+0008 0800 @endread1               ldr r0,mem_a
+     00F8
+000A 1800                         str r0,mem_b
+     00F9
+000C 2F00                         mov r7,#endprint1
+     0012
+000E 0800                         ldr r0,mem_b
+     00F9
+0010 8800                         b printInt
+     0020
+0012 2800 @endprint1              mov r0,#100
+     0064
+0014 1800                         str r0,mem_c
+     00FA
+0016 2F00                         mov r7,#endprint2
+     001C
+0018 0800                         ldr r0,mem_c
+     00FA
+001A 8800                         b printInt
+     0020
+001C 8800 @endprint2              b end
+     001E
+001E 8800 @end                    b end
+     001E
+0020 1804 @printInt               str r1,printInt_r1
+     0080
+0022 1808                         str r2,printInt_r2
+     0081
+0024 180C                         str r3,printInt_r3
+     0082
+0026 1810                         str r4,printInt_r4
+     0083
+0028 1814                         str r5,printInt_r5
+     0084
+002A 2900                         mov r1,#0
+     0000
+002C 2A00                         mov r2,#0
+     0000
+002E 2B00                         mov r3,#0
+     0000
+0030 2C00                         mov r4,#0
+     0000
+0032 2D00                         mov r5,#0
+     0000
+0034 5800                         cmp r0,#0
+     0000
+0036 7800                         blt printInt_minus
+     003A
+0038 8800                         b printInt_loop_a
+     0041
+003A 2D00 @printInt_minus         mov r5,#45
+     002D
+003C 1814                         str r5,0xABCD
+     ABCD
+003E 2D00                         mov r5,#0
+     0000
+0040 40A0                         sub r0,r5,r0
+0041 5820 @printInt_loop_a        cmp r1,#5
+     0005
+0043 6800                         beq printInt_endloop_a
+     0064
+0045 3C20                         add r4,r1,#printInt_table
+     007B
+0047 0480                         ldr r4,[r4]
+0048 2A00                         mov r2,#0
+     0000
+004A 5010 @printInt_loop_b        cmp r0,r4
+004B 7800                         blt printInt_endloop_b
+     0052
+004D 3A40                         add r2,r2,#1
+     0001
+004F 4010                         sub r0,r0,r4
+0050 8800                         b printInt_loop_b
+     004A
+0052 3920 @printInt_endloop_b     add r1,r1,#1
+     0001
+0054 5840                         cmp r2,#0
+     0000
+0056 6800                         beq printInt_endif_a
+     005A
+0058 2B00                         mov r3,#1
+     0001
+005A 5860 @printInt_endif_a       cmp r3,#0
+     0000
+005C 6800                         beq printInt_endif_b
+     0062
+005E 3D40                         add r5,r2,#48
+     0030
+0060 1814                         str r5,0xABCD
+     ABCD
+0062 8800 @printInt_endif_b       b printInt_loop_a
+     0041
+0064 5860 @printInt_endloop_a     cmp r3,#1
+     0001
+0066 6800                         beq printInt_endif_c
+     006C
+0068 2D00                         mov r5,#48
+     0030
+006A 1814                         str r5,0xABCD
+     ABCD
+006C 2D00 @printInt_endif_c       mov r5,#10
+     000A
+006E 1814                         str r5,0xABCD
+     ABCD
+0070 0900                         ldr r1,printInt_r1
+     0080
+0072 0A00                         ldr r2,printInt_r2
+     0081
+0074 0B00                         ldr r3,printInt_r3
+     0082
+0076 0C00                         ldr r4,printInt_r4
+     0083
+0078 0D00                         ldr r5,printInt_r5
+     0084
+007A 801C                         b r7
+007B 2710 @printInt_table         smw 10000
+007C 03E8                         smw 1000
+007D 0064                         smw 100
+007E 000A                         smw 10
+007F 0001                         smw 1
+0080 0000 @printInt_r1            rmw 1
+0081 0000 @printInt_r2            rmw 1
+0082 0000 @printInt_r3            rmw 1
+0083 0000 @printInt_r4            rmw 1
+0084 0000 @printInt_r5            rmw 1
+0085 1804 @printStr               str r1,printStr_r1_mem
+     0096
+0087 0100                         ldr r1,[r0]
+0088 5820 @printStr_loop          cmp r1,#0
+     0000
+008A 6800                         beq printStr_end
+     0093
+008C 1804                         str r1,0xABCD
+     ABCD
+008E 3800                         add r0,r0,#1
+     0001
+0090 0100                         ldr r1,[r0]
+0091 8800                         b printStr_loop
+     0088
+0093 0900 @printStr_end           ldr r1,printStr_r1_mem
+     0096
+0095 801C                         b r7
+0096 0000 @printStr_r1_mem        rmw 1
+0097 0B00 @readChr                ldr r3,0x9234
+     9234
+0099 5860                         cmp r3,#0
+     0000
+009B 6800                         beq readChr
+     0097
+009D 180C                         str r3,0x9234
+     9234
+009F 801C                         b r7
+00A0 1804 @readInt                str r1,readInt_r1
+     00F3
+00A2 1808                         str r2,readInt_r2
+     00F4
+00A4 180C                         str r3,readInt_r3
+     00F5
+00A6 1810                         str r4,readInt_r4
+     00F6
+00A8 181C                         str r7,readInt_r7
+     00F7
+00AA 2800                         mov r0,#0
+     0000
+00AC 2900                         mov r1,#0
+     0000
+00AE 2A00                         mov r2,#0
+     0000
+00B0 2B00                         mov r3,#0
+     0000
+00B2 2C00                         mov r4,#0
+     0000
+00B4 2F00                         mov r7,#readInt_return_1
+     00B8
+00B6 8800                         b readChr
+     0097
+00B8 5860 @readInt_return_1       cmp r3,#45
+     002D
+00BA 6800                         beq readInt_isMinus
+     00BE
+00BC 8800                         b readInt_minus_continue
+     00C6
+00BE 2C00 @readInt_isMinus        mov r4,#1
+     0001
+00C0 180C                         str r3,0xABCD
+     ABCD
+00C2 2F00                         mov r7,#readInt_minus_continue
+     00C6
+00C4 8800                         b readChr
+     0097
+00C6 5860 @readInt_minus_continue cmp r3,#58
+     003A
+00C8 7800                         blt readInt_maybevalid
+     00CC
+00CA 8800                         b readInt_noMoreNber
+     00DD
+00CC 5860 @readInt_maybevalid     cmp r3,#48
+     0030
+00CE 7800                         blt readInt_noMoreNber
+     00DD
+00D0 180C                         str r3,0xABCD
+     ABCD
+00D2 3000                         add r0,r0,r0
+00D3 3100                         add r1,r0,r0
+00D4 3124                         add r1,r1,r1
+00D5 3004                         add r0,r0,r1
+00D6 4B60                         sub r3,r3,#48
+     0030
+00D8 300C                         add r0,r0,r3
+00D9 2F00                         mov r7,#readInt_minus_continue
+     00C6
+00DB 8800                         b readChr
+     0097
+00DD 2B00 @readInt_noMoreNber     mov r3,#10
+     000A
+00DF 180C                         str r3,0xABCD
+     ABCD
+00E1 5880                         cmp r4,#0
+     0000
+00E3 6800                         beq readInt_maybenewline
+     00E8
+00E5 2B00                         mov r3,#0
+     0000
+00E7 4060                         sub r0,r3,r0
+00E8 0900 @readInt_maybenewline   ldr r1,readInt_r1
+     00F3
+00EA 0A00                         ldr r2,readInt_r2
+     00F4
+00EC 0B00                         ldr r3,readInt_r3
+     00F5
+00EE 0C00                         ldr r4,readInt_r4
+     00F6
+00F0 0F00                         ldr r7,readInt_r7
+     00F7
+00F2 801C                         b r7
+00F3 0000 @readInt_r1             rmw 1
+00F4 0000 @readInt_r2             rmw 1
+00F5 0000 @readInt_r3             rmw 1
+00F6 0000 @readInt_r4             rmw 1
+00F7 0000 @readInt_r7             rmw 1
+00F8 0000 @mem_a                  rmw 1
+00F9 0000 @mem_b                  rmw 1
+00FA 0000 @mem_c                  rmw 1
+00FB 0000 @stack_initialization   rmw 1

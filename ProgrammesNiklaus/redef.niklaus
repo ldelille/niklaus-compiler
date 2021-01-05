@@ -1,0 +1,7 @@
+// La conpilation de ce programme doit echouer car il tente de definir
+// deux fois la variable a.
+
+program Redef;
+var a, b, c, a;
+{
+}

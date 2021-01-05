@@ -1,0 +1,23 @@
+// La compilation de ce programme doit reussir.
+// Il affiche les premiers termes de la suite de Fibonacci,
+// u_{n+2} = u_{n+1} + u_n :   1 1 2 3 5 8 13 etc.
+
+program Fibo;
+var u, v, w, i;
+{
+	u := 1;
+	write u;
+	v := 1;
+	write v;
+	
+	i := 0;
+	while(i < 20) {
+		w := u + v;
+		u := v;
+		v := w;
+		
+		write v;
+		
+		i := i + 1;
+	}
+}

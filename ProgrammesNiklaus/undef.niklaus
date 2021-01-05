@@ -1,0 +1,8 @@
+// La compilation de ce programme doit echouer : il essaie d'utiliser une
+// variable non declaree.
+
+program Undef;
+var a;
+{
+	a := 4 * b;
+}
