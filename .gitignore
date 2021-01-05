@@ -1,0 +1,7 @@
+*.mem
+*.java
+*.class
+/venv
+*.interp
+*.tokens
+*.arm
