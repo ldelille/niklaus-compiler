@@ -1,8 +1,0 @@
-// La compilation de ce programme doit reussir.
-// Ce programme doit afficher 2 puis 3.
-
-program Basic;
-{
-    write 2;
-    write 3;
-}
