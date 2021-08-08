@@ -1,0 +1,204 @@
+% BEGIN PRINTINT
+%
+% r0 = curNber = input
+% r1 = index
+% r2 = digit
+% r3 = 1 if nber has started yet, 0 else
+% r4 = digitIndex
+%
+% r5 : scratch pad
+%
+@printInt
+       str r1, printInt_r1 % store r1
+       str r2, printInt_r2 % store r2
+       str r3, printInt_r3 % store r3
+       str r4, printInt_r4 % store r4
+       str r5, printInt_r5 % store r5
+
+       mov r1, #0          % index := 0
+       mov r2, #0
+       mov r3, #0          % printing has not started yet
+       mov r4, #0
+       mov r5, #0
+       cmp r0, #0          % if there is a need for "-"
+       blt printInt_minus
+       b printInt_loop_a
+@printInt_minus
+       mov r5, #45         %    put in scratchpad a "-"
+       str r5, 0xABCD      %    print 
+       mov r5, #0
+       sub r0, r5, r0      %    take opposite sign
+                           % endif
+@printInt_loop_a
+       cmp r1, #5          % while (index != 5)
+       beq printInt_endloop_a
+       add r4, r1, #printInt_table  %   digIndex := table + index
+       ldr r4, [r4]        %   digIndex := *(table + index)
+       mov r2, #0          %   digit := 0
+@printInt_loop_b
+       cmp r0, r4          %   while (curNber >= digitIndex)
+       blt printInt_endloop_b
+       add r2, r2, #1      %      ++digit
+       sub r0, r0, r4      %      curNber -= digitIndex
+       b printInt_loop_b      %   endwhile
+@printInt_endloop_b
+       add r1, r1, #1      %   ++index
+       cmp r2, #0          %   if (digit != 0)
+       beq printInt_endif_a
+       mov r3, #1          %      state that we should start printing
+@printInt_endif_a             
+       cmp r3, #0          %   if (should print)
+       beq printInt_endif_b
+       add r5, r2, #48     %     put in scratchpad char corresp to digit
+       str r5, 0xABCD      %     print digit
+@printInt_endif_b             
+       b printInt_loop_a      % endwhile
+@printInt_endloop_a
+       cmp r3, #1          % if (should not print)
+       beq printInt_endif_c
+       mov r5, #48         %    put in scratchpad the 0 char
+       str r5, 0xABCD      %    print digit
+@printInt_endif_c
+       mov r5, #10         %    put in scratchpad a newline
+       str r5, 0xABCD      %    print
+       ldr r1, printInt_r1 % restore r1
+       ldr r2, printInt_r2 % restore r2
+       ldr r3, printInt_r3 % restore r3
+       ldr r4, printInt_r4 % restore r4
+       ldr r5, printInt_r5 % restore r5
+       b r7                % return
+@printInt_table
+       smw 10000
+       smw 1000
+       smw 100
+       smw 10
+       smw 1
+% For storing registers
+@printInt_r1 rmw 1
+@printInt_r2 rmw 1
+@printInt_r3 rmw 1
+@printInt_r4 rmw 1
+@printInt_r5 rmw 1
+
+
+% END PRINTINT
+% BEGIN PRINTSTR
+%
+% Expect a pointer to an array in memory containing chars. Print each
+% char in order, stops when it meets null.
+%
+% r0 : address of the the string 
+% r1 : temp buffer for char to print
+% 
+@printStr
+      str r1, printStr_r1_mem   % save content of r1
+      ldr r1, [r0]              % retrieve char
+@printStr_loop
+      cmp r1, #0                % while r1 != 0
+      beq printStr_end      
+      str r1, 0xABCD            %   print char
+      add r0, r0, #1            %   ++r0
+      ldr r1, [r0]              %   retrieve char
+      b printStr_loop
+@printStr_end
+      ldr r1, printStr_r1_mem   % restore r1
+      b r7     
+@printStr_r1_mem rmw 1
+%
+% END PRINTSTR
+% BEGIN READCHR
+%
+% Place in r3 the read char
+% 
+@readChr
+      ldr r3, 0x9234  % read from input stream
+      cmp r3, #0      
+      beq readChr     % start over if got 0
+      str r3, 0x9234  % clear the char from the input stream
+      b r7            % return
+%
+% END READCHR
+% BEGIN READINT
+%
+% Uses readChr.arm
+%
+% read an integer and place it in r0.
+% accept negative inputs.
+% do not check for overflow.
+% if error, give back 0.
+%
+% r0 : store the result
+% r1, r2 : scratchpad for multiplication
+% r3 : for the read char
+% r4 : 1 if started with a "-", 0 else
+@readInt
+      str r1, readInt_r1 
+      str r2, readInt_r2
+      str r3, readInt_r3 
+      str r4, readInt_r4
+      str r7, readInt_r7
+      mov r0, #0
+      mov r1, #0
+      mov r2, #0
+      mov r3, #0
+      mov r4, #0                   % set default value for neg sign in r4
+      mov r7, #readInt_return_1    % read a char
+      b readChr
+@readInt_return_1
+      cmp r3, #45                  % is the character "-" ?
+      beq readInt_isMinus
+      b readInt_minus_continue
+@readInt_isMinus
+      mov r4, #1                         % register that we met a "-"
+      str r3, 0xABCD                     % print the "-"
+      mov r7, #readInt_minus_continue    % read a new char
+      b readChr
+        % Now, we expect a sequence of numbers, followed by a newline.
+        % We test the char, process, and come back for more if it was a number
+@readInt_minus_continue
+      cmp r3,#58                         % Compare r3 with '9'+1
+      blt readInt_maybevalid             % is it smaller ?
+      b readInt_noMoreNber               % if not, done with numbers
+@readInt_maybevalid
+      cmp r3,#48                         % if r3 < '0', done with numbers
+      blt readInt_noMoreNber
+        % if we got here, we have a number
+        % print it
+      str r3, 0xABCD
+        % multiply r0 by 10
+        % 10 is 8 + 2
+      add r0,r0,r0  % r0 = 2 * input
+      add r1,r0,r0  % r1 = 4 * input
+      add r1,r1,r1  % r1 = 8 * input
+      add r0,r0,r1  % r0 = 10 * input
+        % then add r3 - '0'
+      sub r3, r3, #48
+      add r0,r0,r3
+        % read a new char and start over
+      mov r7, #readInt_minus_continue  
+      b readChr
+        % if we got stg that is not a number, print a new line
+@readInt_noMoreNber
+      mov r3, #10
+      str r3, 0xABCD
+        % then with the negative sign if needed
+      cmp r4, #0
+      beq readInt_maybenewline
+      mov r3, #0
+      sub r0, r3, r0
+        % restore things and return
+@readInt_maybenewline
+      ldr r1, readInt_r1 
+      ldr r2, readInt_r2
+      ldr r3, readInt_r3 
+      ldr r4, readInt_r4
+      ldr r7, readInt_r7 
+      b r7
+        % for storing things
+@readInt_r1 rmw 1
+@readInt_r2 rmw 1
+@readInt_r3 rmw 1
+@readInt_r4 rmw 1
+@readInt_r7 rmw 1
+%
+% END READINT

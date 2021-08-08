@@ -1,8 +1,8 @@
 import sys
-from antlr4 import *
+
 from NiklausLexer import NiklausLexer
 from NiklausParser import NiklausParser
-from NiklausVisitor import *
+from NiklausVisitor import NiklausVisitor
 
 
 class NiklausCompiler(NiklausVisitor):
